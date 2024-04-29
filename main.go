@@ -1,18 +1,22 @@
 package chunker
 
 type Chunker struct {
-	ChunkSize     int
-	Overlap       int
-	Breakpoint    []string
-	RemoveNewline bool
+	ChunkSize            int
+	Overlap              int
+	Separators           []string
+	OutputWithoutNewline bool
 }
 
-func NewChunker(chunkSize, overlap int, breakpoint []string, removeNewline bool) *Chunker {
+var (
+	DefaultSeparators = []string{"\n\n", "\n", " "}
+)
+
+func NewChunker(chunkSize, overlap int, separators []string, outputWithoutNewline bool) *Chunker {
 	return &Chunker{
-		ChunkSize:     chunkSize,
-		Overlap:       overlap,
-		Breakpoint:    breakpoint,
-		RemoveNewline: removeNewline,
+		ChunkSize:            chunkSize,
+		Overlap:              overlap,
+		Separators:           separators,
+		OutputWithoutNewline: outputWithoutNewline,
 	}
 }
 
@@ -22,8 +26,8 @@ func (c *Chunker) Chunk(data []byte) [][]byte {
 	var lastBreakpoint int
 	for i, b := range data {
 		if i-lastBreakpoint >= c.ChunkSize {
-			if c.RemoveNewline {
-				chunk = cleanChunk(chunk)
+			if c.OutputWithoutNewline {
+				chunk = removeNewlineInChunk(chunk)
 			}
 			chunks = append(chunks, chunk)
 			lastBreakpoint = i
@@ -31,11 +35,11 @@ func (c *Chunker) Chunk(data []byte) [][]byte {
 		}
 		chunk = append(chunk, b)
 		if i-lastBreakpoint >= c.ChunkSize-c.Overlap {
-			for _, bp := range c.Breakpoint {
-				if len(chunk) >= len(bp) {
-					if string(chunk[len(chunk)-len(bp):]) == bp {
-						if c.RemoveNewline {
-							chunk = cleanChunk(chunk)
+			for _, sp := range c.Separators {
+				if len(chunk) >= len(sp) {
+					if string(chunk[len(chunk)-len(sp):]) == sp {
+						if c.OutputWithoutNewline {
+							chunk = removeNewlineInChunk(chunk)
 						}
 						chunks = append(chunks, chunk)
 						lastBreakpoint = i
@@ -47,18 +51,24 @@ func (c *Chunker) Chunk(data []byte) [][]byte {
 		}
 	}
 	if len(chunk) > 0 {
-		if c.RemoveNewline {
-			chunk = cleanChunk(chunk)
+		if c.OutputWithoutNewline {
+			chunk = removeNewlineInChunk(chunk)
 		}
 		chunks = append(chunks, chunk)
 	}
 	return chunks
 }
 
-func cleanChunk(chunk []byte) []byte {
+func removeNewlineInChunk(chunk []byte) []byte {
 	cleanChunk := make([]byte, 0)
 	for i := range chunk {
-		if chunk[i] == '\n' {
+		if i == 0 && chunk[i] == '\n' { // remove leading newline
+			continue
+		}
+		if chunk[i] == '\n' { // remove newline
+			if i+1 < len(chunk) && chunk[i+1] != ' ' { // add space if next character is not space
+				cleanChunk = append(cleanChunk, ' ')
+			}
 			continue
 		}
 		cleanChunk = append(cleanChunk, chunk[i])

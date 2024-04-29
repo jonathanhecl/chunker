@@ -60,7 +60,7 @@ func TestChunker_Chunk(t *testing.T) {
 			wantChunks: 34,
 		},
 	}
-	c := NewChunker(100, 20, []string{"\n\n", "\n", ", ", " "}, true)
+	c := NewChunker(100, 20, DefaultSeparators, true)
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := c.Chunk(tt.args.data)
