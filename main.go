@@ -16,6 +16,19 @@ var (
 )
 
 func NewChunker(chunkSize, overlap int, separators []string, outputWithoutNewline bool) *Chunker {
+	if chunkSize <= 0 {
+		chunkSize = 150
+	}
+	if overlap <= 0 {
+		overlap = 30
+	}
+	if overlap >= chunkSize {
+		overlap = int(chunkSize / 4)
+	}
+	if len(separators) == 0 {
+		separators = DefaultSeparators
+	}
+
 	return &Chunker{
 		ChunkSize:            chunkSize,
 		Overlap:              overlap,
@@ -41,40 +54,45 @@ func (c *Chunker) Chunk(data string) []string {
 			}
 
 			possibleChunk := data[:c.ChunkSize]
+			lastSeparator, ss := findLastSeparator(possibleChunk, c.Separators, 0)
+			possibleChunk = possibleChunk[:lastSeparator]
+
 			if c.OutputWithoutNewline {
 				possibleChunk = removeNewlineInChunk(possibleChunk)
 			}
-			lastSeparator, ss := findLastSeparator(possibleChunk, c.Separators)
-			chunks = append(chunks, possibleChunk[:lastSeparator])
+
+			chunks = append(chunks, possibleChunk)
 			i = lastSeparator + ss - c.Overlap
 		} else {
 			if len(data)-i < c.ChunkSize {
 				possibleChunk := data[i:]
-				if c.OutputWithoutNewline {
-					possibleChunk = removeNewlineInChunk(possibleChunk)
-				}
 				firstSeparator := findFirstSeparator(possibleChunk, c.Separators)
 				if firstSeparator > c.Overlap {
 					firstSeparator = 0
 				}
-				chunks = append(chunks, possibleChunk[firstSeparator:])
+				possibleChunk = possibleChunk[firstSeparator:]
+
+				if c.OutputWithoutNewline {
+					possibleChunk = removeNewlineInChunk(possibleChunk)
+				}
+
+				chunks = append(chunks, possibleChunk)
 				break
 			}
 
 			possibleChunk := data[i : i+c.ChunkSize]
-			if c.OutputWithoutNewline {
-				possibleChunk = removeNewlineInChunk(possibleChunk)
-			}
 			firstSeparator := findFirstSeparator(possibleChunk, c.Separators)
 			if firstSeparator > c.Overlap {
 				firstSeparator = 0
 			}
-			lastSeparator, ss := findLastSeparator(possibleChunk, c.Separators)
-			if lastSeparator < firstSeparator {
-				lastSeparator = len(possibleChunk)
+			lastSeparator, ss := findLastSeparator(possibleChunk, c.Separators, firstSeparator)
+			possibleChunk = possibleChunk[firstSeparator:lastSeparator]
+
+			if c.OutputWithoutNewline {
+				possibleChunk = removeNewlineInChunk(possibleChunk)
 			}
 
-			chunks = append(chunks, possibleChunk[firstSeparator:lastSeparator])
+			chunks = append(chunks, possibleChunk)
 			i += lastSeparator + ss - c.Overlap
 		}
 	}
@@ -94,11 +112,11 @@ func findFirstSeparator(chunk string, separators []string) (offset int) {
 	return 0
 }
 
-func findLastSeparator(chunk string, separators []string) (offset, separatorSize int) {
-	for _, sp := range inverted(separators) {
+func findLastSeparator(chunk string, separators []string, from int) (offset, separatorSize int) {
+	for _, sp := range separators {
 		if len(chunk) >= len(sp) {
 			lastPos := strings.LastIndex(chunk, sp)
-			if lastPos != -1 {
+			if lastPos != -1 && lastPos > from {
 				return lastPos, len(sp)
 			}
 		}
@@ -123,12 +141,4 @@ func removeNewlineInChunk(chunk string) string {
 	chunk = strings.ReplaceAll(chunk, "\n", " ")
 
 	return chunk
-}
-
-func inverted(s []string) []string {
-	r := make([]string, len(s))
-	for i, v := range s {
-		r[len(s)-1-i] = v
-	}
-	return r
 }

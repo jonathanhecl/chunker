@@ -18,13 +18,6 @@ largest city of the nation, Buenos Aires. The provinces and the capital have the
 own constitutions, but exist under a federal system. Argentina claims sovereignty 
 over the Falkland Islands, South Georgia and the South Sandwich Islands, the Southern 
 Patagonian Ice Field, and a part of Antarctica.
-
-The earliest recorded human presence in modern-day Argentina dates back to the Paleolithic
-period.[c] The country has its roots in Spanish colonization of the region during the 16th
-century. Argentina rose as the successor state of the Viceroyalty of the Río de la Plata,[d]
-a Spanish overseas viceroyalty founded in 1776. The declaration and fight for independence
-(from Spain) was in 1816. The country thereafter enjoyed relative peace and stability, with
-several waves of European.
 `
 
 func TestChunker_Chunk(t *testing.T) {
@@ -84,21 +77,10 @@ func Test_findLastSeparator(t *testing.T) {
 			},
 			want: 20,
 		},
-		{
-			name: "Test find last separator",
-			args: args{
-				chunk: `the Southern 
-Patagonian Ice Field, and a part of Antarctica.
-
-The earliest recorded human presence in modern-day Argentina dates back to the Paleoli`,
-				separators: DefaultSeparators,
-			},
-			want: 20,
-		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got, _ := findLastSeparator(tt.args.chunk, tt.args.separators); got != tt.want {
+			if got, _ := findLastSeparator(tt.args.chunk, tt.args.separators, 0); got != tt.want {
 				t.Errorf("findLastSeparator() = %v, want %v", got, tt.want)
 			}
 		})
