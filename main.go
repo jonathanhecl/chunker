@@ -1,5 +1,9 @@
 package chunker
 
+import (
+	"strings"
+)
+
 type Chunker struct {
 	ChunkSize            int
 	Overlap              int
@@ -8,7 +12,7 @@ type Chunker struct {
 }
 
 var (
-	DefaultSeparators = []string{"\n\n", "\n", " "}
+	DefaultSeparators = []string{"\n\n", " ", "\n"}
 )
 
 func NewChunker(chunkSize, overlap int, separators []string, outputWithoutNewline bool) *Chunker {
@@ -20,61 +24,111 @@ func NewChunker(chunkSize, overlap int, separators []string, outputWithoutNewlin
 	}
 }
 
-func (c *Chunker) Chunk(data []byte) [][]byte {
-	var chunks [][]byte
-	var chunk []byte
-	var lastBreakpoint int
-	for i, b := range data {
-		if i-lastBreakpoint >= c.ChunkSize {
-			if c.OutputWithoutNewline {
-				chunk = removeNewlineInChunk(chunk)
-			}
-			chunks = append(chunks, chunk)
-			lastBreakpoint = i
-			chunk = nil
-		}
-		chunk = append(chunk, b)
-		if i-lastBreakpoint >= c.ChunkSize-c.Overlap {
-			for _, sp := range c.Separators {
-				if len(chunk) >= len(sp) {
-					if string(chunk[len(chunk)-len(sp):]) == sp {
-						if c.OutputWithoutNewline {
-							chunk = removeNewlineInChunk(chunk)
-						}
-						chunks = append(chunks, chunk)
-						lastBreakpoint = i
-						chunk = nil
-						break
-					}
+func (c *Chunker) Chunk(data string) []string {
+	var chunks []string
+
+	var i int = 0
+	for {
+		if i == 0 {
+			if len(data) < c.ChunkSize {
+				possibleChunk := data
+				if c.OutputWithoutNewline {
+					possibleChunk = removeNewlineInChunk(possibleChunk)
 				}
+
+				chunks = append(chunks, possibleChunk)
+				break
 			}
+
+			possibleChunk := data[:c.ChunkSize]
+			if c.OutputWithoutNewline {
+				possibleChunk = removeNewlineInChunk(possibleChunk)
+			}
+			lastSeparator, ss := findLastSeparator(possibleChunk, c.Separators)
+			chunks = append(chunks, possibleChunk[:lastSeparator])
+			i = lastSeparator + ss - c.Overlap
+		} else {
+			if len(data)-i < c.ChunkSize {
+				possibleChunk := data[i:]
+				if c.OutputWithoutNewline {
+					possibleChunk = removeNewlineInChunk(possibleChunk)
+				}
+				firstSeparator := findFirstSeparator(possibleChunk, c.Separators)
+				if firstSeparator > c.Overlap {
+					firstSeparator = 0
+				}
+				chunks = append(chunks, possibleChunk[firstSeparator:])
+				break
+			}
+
+			possibleChunk := data[i : i+c.ChunkSize]
+			if c.OutputWithoutNewline {
+				possibleChunk = removeNewlineInChunk(possibleChunk)
+			}
+			firstSeparator := findFirstSeparator(possibleChunk, c.Separators)
+			if firstSeparator > c.Overlap {
+				firstSeparator = 0
+			}
+			lastSeparator, ss := findLastSeparator(possibleChunk, c.Separators)
+			if lastSeparator < firstSeparator {
+				lastSeparator = len(possibleChunk)
+			}
+
+			chunks = append(chunks, possibleChunk[firstSeparator:lastSeparator])
+			i += lastSeparator + ss - c.Overlap
 		}
 	}
-	if len(chunk) > 0 {
-		if c.OutputWithoutNewline {
-			chunk = removeNewlineInChunk(chunk)
-		}
-		chunks = append(chunks, chunk)
-	}
+
 	return chunks
 }
 
-func removeNewlineInChunk(chunk []byte) []byte {
-	cleanChunk := make([]byte, 0)
-	for i := range chunk {
-		if i == 0 && chunk[i] == '\n' { // remove leading newline
-			continue
-		}
-		if i == len(chunk)-1 && chunk[i] == '\n' { // remove trailing newline
-			continue
-		}
-		if chunk[i] == '\n' { // remove newline
-			if i+1 < len(chunk) && chunk[i+1] != ' ' { // add space if next character is not space
-				cleanChunk = append(cleanChunk, ' ')
+func findFirstSeparator(chunk string, separators []string) (offset int) {
+	for _, sp := range separators {
+		if len(chunk) >= len(sp) {
+			firstPos := strings.Index(chunk, sp)
+			if firstPos != -1 {
+				return firstPos + len(sp)
 			}
-			continue
 		}
-		cleanChunk = append(cleanChunk, chunk[i])
 	}
-	return cleanChunk
+	return 0
+}
+
+func findLastSeparator(chunk string, separators []string) (offset, separatorSize int) {
+	for _, sp := range inverted(separators) {
+		if len(chunk) >= len(sp) {
+			lastPos := strings.LastIndex(chunk, sp)
+			if lastPos != -1 {
+				return lastPos, len(sp)
+			}
+		}
+	}
+	return 0, 0
+}
+
+func removeNewlineInChunk(chunk string) string {
+	// remove /n from the beginning of the chunk
+	if chunk[0] == '\n' {
+		chunk = chunk[1:]
+	}
+
+	// remove /n from the end of the chunk
+	if chunk[len(chunk)-1] == '\n' {
+		chunk = chunk[:len(chunk)-1]
+	}
+
+	// remove /n in the middle of the chunk, replace with space if it is not followed by a space
+	chunk = strings.ReplaceAll(chunk, "\n ", " ")
+	chunk = strings.ReplaceAll(chunk, " \n", " ")
+	chunk = strings.ReplaceAll(chunk, "\n", " ")
+
+	return chunk
+}
+
+func inverted(s []string) []string {
+	r := make([]string, len(s))
+	for i, v := range s {
+		r[len(s)-1-i] = v
+	}
+	return r
 }
