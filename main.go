@@ -9,6 +9,8 @@ type Chunker struct {
 	Overlap              int
 	Separators           []string
 	OutputWithoutNewline bool
+	// internal
+	chunks []string
 }
 
 var (
@@ -38,18 +40,15 @@ func NewChunker(chunkSize, overlap int, separators []string, outputWithoutNewlin
 }
 
 func (c *Chunker) Chunk(data string) []string {
-	var chunks []string
+	c.ClearChunks()
 
 	var i int = 0
 	for {
 		if i == 0 {
 			if len(data) < c.ChunkSize {
 				possibleChunk := data
-				if c.OutputWithoutNewline {
-					possibleChunk = removeNewlineInChunk(possibleChunk)
-				}
 
-				chunks = append(chunks, possibleChunk)
+				c.addChunk(possibleChunk)
 				break
 			}
 
@@ -57,11 +56,7 @@ func (c *Chunker) Chunk(data string) []string {
 			lastSeparator, ss := findLastSeparator(possibleChunk, c.Separators, 0)
 			possibleChunk = possibleChunk[:lastSeparator]
 
-			if c.OutputWithoutNewline {
-				possibleChunk = removeNewlineInChunk(possibleChunk)
-			}
-
-			chunks = append(chunks, possibleChunk)
+			c.addChunk(possibleChunk)
 			i = lastSeparator + ss - c.Overlap
 		} else {
 			if len(data)-i < c.ChunkSize {
@@ -72,11 +67,7 @@ func (c *Chunker) Chunk(data string) []string {
 				}
 				possibleChunk = possibleChunk[firstSeparator:]
 
-				if c.OutputWithoutNewline {
-					possibleChunk = removeNewlineInChunk(possibleChunk)
-				}
-
-				chunks = append(chunks, possibleChunk)
+				c.addChunk(possibleChunk)
 				break
 			}
 
@@ -88,16 +79,37 @@ func (c *Chunker) Chunk(data string) []string {
 			lastSeparator, ss := findLastSeparator(possibleChunk, c.Separators, firstSeparator)
 			possibleChunk = possibleChunk[firstSeparator:lastSeparator]
 
-			if c.OutputWithoutNewline {
-				possibleChunk = removeNewlineInChunk(possibleChunk)
-			}
-
-			chunks = append(chunks, possibleChunk)
+			c.addChunk(possibleChunk)
 			i += lastSeparator + ss - c.Overlap
 		}
 	}
 
-	return chunks
+	return c.GetChunks()
+}
+
+func (c *Chunker) addChunk(chunk string) {
+	if c.OutputWithoutNewline {
+		chunk = removeNewlineInChunk(chunk)
+	}
+
+	chunk = strings.TrimSpace(chunk)
+	if len(chunk) == 0 {
+		return
+	}
+
+	c.chunks = append(c.chunks, chunk)
+}
+
+func (c *Chunker) ClearChunks() {
+	c.chunks = make([]string, 0)
+}
+
+func (c *Chunker) GetChunkSize() int {
+	return c.ChunkSize
+}
+
+func (c *Chunker) GetChunks() []string {
+	return c.chunks
 }
 
 func findFirstSeparator(chunk string, separators []string) (offset int) {

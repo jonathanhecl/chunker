@@ -17,21 +17,31 @@ twenty-three provinces, and one autonomous city, which is the federal capital an
 largest city of the nation, Buenos Aires. The provinces and the capital have their 
 own constitutions, but exist under a federal system. Argentina claims sovereignty 
 over the Falkland Islands, South Georgia and the South Sandwich Islands, the Southern 
-Patagonian Ice Field, and a part of Antarctica.
-`
+Patagonian Ice Field, and a part of Antarctica.`
 
 func TestChunker_Chunk(t *testing.T) {
 	type args struct {
 		data string
 	}
 	tests := []struct {
+		chunker    *Chunker
 		name       string
 		args       args
 		wantChunks int
 		maxSize    int
 	}{
 		{
-			name: "Test example",
+			chunker: NewChunker(40, 10, DefaultSeparators, true),
+			name:    "Test demo",
+			args: args{
+				data: "This is a test string. It is used to test the chunker. It is a very simple chunker.",
+			},
+			wantChunks: 3,
+			maxSize:    40,
+		},
+		{
+			chunker: NewChunker(150, 30, DefaultSeparators, true),
+			name:    "Example with wikipedia text",
 			args: args{
 				data: exampleText,
 			},
@@ -39,10 +49,9 @@ func TestChunker_Chunk(t *testing.T) {
 			maxSize:    150,
 		},
 	}
-	c := NewChunker(150, 30, DefaultSeparators, true)
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := c.Chunk(tt.args.data)
+			got := tt.chunker.Chunk(tt.args.data)
 
 			for i, chunk := range got {
 				fmt.Println("Chunk ", i+1, " `"+chunk+"` [ Length", len(chunk), "]")
