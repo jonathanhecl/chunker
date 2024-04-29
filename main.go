@@ -65,6 +65,9 @@ func removeNewlineInChunk(chunk []byte) []byte {
 		if i == 0 && chunk[i] == '\n' { // remove leading newline
 			continue
 		}
+		if i == len(chunk)-1 && chunk[i] == '\n' { // remove trailing newline
+			continue
+		}
 		if chunk[i] == '\n' { // remove newline
 			if i+1 < len(chunk) && chunk[i+1] != ' ' { // add space if next character is not space
 				cleanChunk = append(cleanChunk, ' ')
