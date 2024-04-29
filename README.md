@@ -12,13 +12,13 @@ A simple chunker for text data. It is useful for chunking text data into smaller
 ```go get github.com/jonathanhecl/chunker```
 
 ## Usage
-```
+```go
 c := chunker.NewChunker(40, 10, chunker.DefaultSeparators, true)
 chunks := c.Chunk("This is a test string. It is used to test the chunker. It is a very simple chunker.")
 ```
 
 ## Result
-```
+```text
 Chunk  1  `This is a test string. It is used to` [ Length 36 ]
 Chunk  2  `used to test the chunker. It is a` [ Length 33 ]
 Chunk  3  `It is a very simple chunker.` [ Length 28 ]
