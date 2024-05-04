@@ -148,18 +148,9 @@ func removeNewlineInChunk(chunk string) string {
 	}
 
 	// remove /n in the middle of the chunk, replace with space if it is not followed by a space
-	for {
-		idx := strings.Index(chunk, "\n")
-		if idx == -1 {
-			break
-		}
-
-		if idx+1 < len(chunk) && chunk[idx+1] != ' ' {
-			chunk = chunk[:idx] + " " + chunk[idx+1:]
-		} else {
-			chunk = chunk[:idx] + chunk[idx+1:]
-		}
-	}
+	chunk = strings.ReplaceAll(chunk, "\n ", " ")
+	chunk = strings.ReplaceAll(chunk, " \n", " ")
+	chunk = strings.ReplaceAll(chunk, "\n", " ")
 
 	return chunk
 }
