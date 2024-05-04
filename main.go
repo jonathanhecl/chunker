@@ -54,9 +54,10 @@ func (c *Chunker) Chunk(data string) []string {
 
 			possibleChunk := data[:c.ChunkSize]
 			lastSeparator, ss := findLastSeparator(possibleChunk, c.Separators, 0)
-			possibleChunk = possibleChunk[:lastSeparator]
 
+			possibleChunk = possibleChunk[:lastSeparator]
 			c.addChunk(possibleChunk)
+
 			i = lastSeparator + ss - c.Overlap
 		} else {
 			if len(data)-i < c.ChunkSize {
@@ -65,8 +66,8 @@ func (c *Chunker) Chunk(data string) []string {
 				if firstSeparator > c.Overlap {
 					firstSeparator = 0
 				}
-				possibleChunk = possibleChunk[firstSeparator:]
 
+				possibleChunk = possibleChunk[firstSeparator:]
 				c.addChunk(possibleChunk)
 				break
 			}
@@ -77,9 +78,10 @@ func (c *Chunker) Chunk(data string) []string {
 				firstSeparator = 0
 			}
 			lastSeparator, ss := findLastSeparator(possibleChunk, c.Separators, firstSeparator)
-			possibleChunk = possibleChunk[firstSeparator:lastSeparator]
 
+			possibleChunk = possibleChunk[firstSeparator:lastSeparator]
 			c.addChunk(possibleChunk)
+
 			i += lastSeparator + ss - c.Overlap
 		}
 	}

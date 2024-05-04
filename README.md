@@ -30,7 +30,8 @@ goos: windows
 goarch: amd64
 pkg: github.com/jonathanhecl/chunker
 cpu: 13th Gen Intel(R) Core(TM) i7-13700K
-BenchmarkChunk_Example1KB/input_size_1024-24              412380              2581 ns/op
-BenchmarkChunk_Example1MB/input_size_1048576-24              432           2694443 ns/op
-BenchmarkChunk_Example5MB/input_size_5242880-24               74          13779535 ns/op
+BenchmarkChunk_Example1KB/input_size_1024-24              432248              2636 ns/op
+BenchmarkChunk_Example1MB/input_size_1048576-24              421           2756651 ns/op
+BenchmarkChunk_Example5MB/input_size_5242880-24               76          13945055 ns/op
+BenchmarkChunk_Example10MB/input_size_10485760-24             38          27780147 ns/op
 ```

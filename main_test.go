@@ -146,3 +146,20 @@ func BenchmarkChunk_Example5MB(b *testing.B) {
 		}
 	})
 }
+
+func BenchmarkChunk_Example10MB(b *testing.B) {
+	characters := []string{"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "\n"}
+
+	size := int64(10 * 1024 * 1024)
+	content := make([]byte, size)
+	for i := 0; i < len(content); i++ {
+		content[i] = characters[i%len(characters)][0]
+	}
+
+	chunker := NewChunker(512, 64, DefaultSeparators, true)
+	b.Run(fmt.Sprintf("input_size_%d", len(content)), func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			chunker.Chunk(string(content))
+		}
+	})
+}
