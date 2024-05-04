@@ -1,7 +1,6 @@
 package chunker
 
 import (
-	"fmt"
 	"testing"
 )
 
@@ -53,8 +52,8 @@ func TestChunker_Chunk(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			got := tt.chunker.Chunk(tt.args.data)
 
-			for i, chunk := range got {
-				fmt.Println("Chunk ", i+1, " `"+chunk+"` [ Length", len(chunk), "]")
+			for _, chunk := range got {
+				// fmt.Println("Chunk `"+chunk+"` [ Length", len(chunk), "]")
 
 				if len(chunk) > tt.maxSize {
 					t.Errorf("Chunker.Chunk() = %v, want %v", len(chunk), tt.maxSize)
@@ -96,9 +95,24 @@ func Test_findLastSeparator(t *testing.T) {
 	}
 }
 
-func BenchmarkChunker_Chunk(b *testing.B) {
+func BenchmarkChunk_Example1KB(b *testing.B) {
 	chunker := NewChunker(150, 30, DefaultSeparators, true)
 	for i := 0; i < b.N; i++ {
 		chunker.Chunk(exampleText)
+	}
+}
+
+func BenchmarkChunk_Example1MB(b *testing.B) {
+	characters := []string{"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "\n"}
+
+	size := int64(1024 * 1024)
+	content := make([]byte, size)
+	for i := 0; i < len(content); i++ {
+		content[i] = characters[i%len(characters)][0]
+	}
+
+	chunker := NewChunker(512, 64, DefaultSeparators, true)
+	for i := 0; i < b.N; i++ {
+		chunker.Chunk(string(content))
 	}
 }

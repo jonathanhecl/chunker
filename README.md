@@ -24,3 +24,12 @@ Chunk  2  `used to test the chunker. It is a` [ Length 33 ]
 Chunk  3  `It is a very simple chunker.` [ Length 28 ]
 ```
 
+## Benchmark
+```text
+goos: windows
+goarch: amd64
+pkg: github.com/jonathanhecl/chunker
+cpu: 13th Gen Intel(R) Core(TM) i7-13700K
+BenchmarkChunk_Example1KB-24              301959              3459 ns/op
+BenchmarkChunk_Example1MB-24                 436           2699100 ns/op
+```
