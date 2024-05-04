@@ -96,9 +96,17 @@ func Test_findLastSeparator(t *testing.T) {
 }
 
 func BenchmarkChunk_Example1KB(b *testing.B) {
-	chunker := NewChunker(150, 30, DefaultSeparators, true)
+	characters := []string{"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "\n"}
+
+	size := int64(1024)
+	content := make([]byte, size)
+	for i := 0; i < len(content); i++ {
+		content[i] = characters[i%len(characters)][0]
+	}
+
+	chunker := NewChunker(256, 32, DefaultSeparators, true)
 	for i := 0; i < b.N; i++ {
-		chunker.Chunk(exampleText)
+		chunker.Chunk(string(content))
 	}
 }
 
