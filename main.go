@@ -146,6 +146,10 @@ func findLastSeparator(chunk string, separators []string, from int) (offset, sep
 }
 
 func removeNewlineInChunk(chunk string) string {
+	if len(chunk) == 0 {
+		return chunk
+	}
+
 	// remove /n from the beginning of the chunk
 	if chunk[0] == '\n' {
 		chunk = chunk[1:]
