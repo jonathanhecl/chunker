@@ -31,7 +31,7 @@ func TestChunker_Chunk(t *testing.T) {
 		maxSize    int
 	}{
 		{
-			chunker: NewChunker(40, 10, DefaultSeparators, true),
+			chunker: NewChunker(40, 10, DefaultSeparators, true, false),
 			name:    "Test demo",
 			args: args{
 				data: "This is a test string. It is used to test the chunker. It is a very simple chunker.",
@@ -40,7 +40,7 @@ func TestChunker_Chunk(t *testing.T) {
 			maxSize:    40,
 		},
 		{
-			chunker: NewChunker(150, 30, DefaultSeparators, true),
+			chunker: NewChunker(150, 30, DefaultSeparators, true, false),
 			name:    "Example with wikipedia text",
 			args: args{
 				data: exampleText,
@@ -105,7 +105,7 @@ func BenchmarkChunk_Example1KB(b *testing.B) {
 		content[i] = characters[i%len(characters)][0]
 	}
 
-	chunker := NewChunker(256, 32, DefaultSeparators, true)
+	chunker := NewChunker(256, 32, DefaultSeparators, true, false)
 	b.Run(fmt.Sprintf("input_size_%d(%d/%d)", len(content), 256, 32), func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			chunker.Chunk(string(content))
@@ -122,7 +122,7 @@ func BenchmarkChunk_Example1MB(b *testing.B) {
 		content[i] = characters[i%len(characters)][0]
 	}
 
-	chunker := NewChunker(512, 64, DefaultSeparators, true)
+	chunker := NewChunker(512, 64, DefaultSeparators, true, false)
 	b.Run(fmt.Sprintf("input_size_%d(%d/%d)", len(content), 512, 64), func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			chunker.Chunk(string(content))
@@ -139,7 +139,7 @@ func BenchmarkChunk_Example5MB(b *testing.B) {
 		content[i] = characters[i%len(characters)][0]
 	}
 
-	chunker := NewChunker(512, 64, DefaultSeparators, true)
+	chunker := NewChunker(512, 64, DefaultSeparators, true, false)
 	b.Run(fmt.Sprintf("input_size_%d(%d/%d)", len(content), 512, 64), func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			chunker.Chunk(string(content))
@@ -156,7 +156,7 @@ func BenchmarkChunk_Example10MB(b *testing.B) {
 		content[i] = characters[i%len(characters)][0]
 	}
 
-	chunker := NewChunker(1024, 128, DefaultSeparators, true)
+	chunker := NewChunker(1024, 128, DefaultSeparators, true, false)
 	b.Run(fmt.Sprintf("input_size_%d(%d/%d)", len(content), 1024, 128), func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			chunker.Chunk(string(content))

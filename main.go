@@ -1,6 +1,7 @@
 package chunker
 
 import (
+	"fmt"
 	"strings"
 )
 
@@ -9,6 +10,7 @@ type Chunker struct {
 	Overlap              int
 	Separators           []string
 	OutputWithoutNewline bool
+	Debug                bool
 	// internal
 	chunks []string
 }
@@ -17,7 +19,7 @@ var (
 	DefaultSeparators = []string{"\n\n", " ", "\n"}
 )
 
-func NewChunker(chunkSize, overlap int, separators []string, outputWithoutNewline bool) *Chunker {
+func NewChunker(chunkSize, overlap int, separators []string, outputWithoutNewline, debug bool) *Chunker {
 	if chunkSize <= 0 {
 		chunkSize = 150
 	}
@@ -36,6 +38,7 @@ func NewChunker(chunkSize, overlap int, separators []string, outputWithoutNewlin
 		Overlap:              overlap,
 		Separators:           separators,
 		OutputWithoutNewline: outputWithoutNewline,
+		Debug:                debug,
 	}
 }
 
@@ -44,6 +47,10 @@ func (c *Chunker) Chunk(data string) []string {
 
 	var i int = 0
 	for {
+		if c.Debug {
+			fmt.Println("i: ", i, "len(data): ", len(data))
+			fmt.Println("chunks: ", len(c.chunks))
+		}
 		if i == 0 {
 			if len(data) < c.ChunkSize {
 				possibleChunk := data
