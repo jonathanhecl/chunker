@@ -95,3 +95,10 @@ func Test_findLastSeparator(t *testing.T) {
 		})
 	}
 }
+
+func BenchmarkChunker_Chunk(b *testing.B) {
+	chunker := NewChunker(150, 30, DefaultSeparators, true)
+	for i := 0; i < b.N; i++ {
+		chunker.Chunk(exampleText)
+	}
+}
