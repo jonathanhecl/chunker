@@ -1,6 +1,7 @@
 package chunker
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -105,9 +106,11 @@ func BenchmarkChunk_Example1KB(b *testing.B) {
 	}
 
 	chunker := NewChunker(256, 32, DefaultSeparators, true)
-	for i := 0; i < b.N; i++ {
-		chunker.Chunk(string(content))
-	}
+	b.Run(fmt.Sprintf("input_size_%d", len(content)), func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			chunker.Chunk(string(content))
+		}
+	})
 }
 
 func BenchmarkChunk_Example1MB(b *testing.B) {
@@ -120,9 +123,11 @@ func BenchmarkChunk_Example1MB(b *testing.B) {
 	}
 
 	chunker := NewChunker(512, 64, DefaultSeparators, true)
-	for i := 0; i < b.N; i++ {
-		chunker.Chunk(string(content))
-	}
+	b.Run(fmt.Sprintf("input_size_%d", len(content)), func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			chunker.Chunk(string(content))
+		}
+	})
 }
 
 func BenchmarkChunk_Example5MB(b *testing.B) {
@@ -135,7 +140,9 @@ func BenchmarkChunk_Example5MB(b *testing.B) {
 	}
 
 	chunker := NewChunker(512, 64, DefaultSeparators, true)
-	for i := 0; i < b.N; i++ {
-		chunker.Chunk(string(content))
-	}
+	b.Run(fmt.Sprintf("input_size_%d", len(content)), func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			chunker.Chunk(string(content))
+		}
+	})
 }
