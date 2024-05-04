@@ -68,6 +68,34 @@ func TestChunker_Chunk(t *testing.T) {
 	}
 }
 
+func Test_findFirstSeparator(t *testing.T) {
+	type args struct {
+		chunk      string
+		separators []string
+	}
+	tests := []struct {
+		name string
+		args args
+		want int
+	}{
+		{
+			name: "Test find first separator",
+			args: args{
+				chunk:      "Testing the logic of findFirstSeparator",
+				separators: DefaultSeparators,
+			},
+			want: 8,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := findFirstSeparator(tt.args.chunk, tt.args.separators); got != tt.want {
+				t.Errorf("findFirstSeparator() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func Test_findLastSeparator(t *testing.T) {
 	type args struct {
 		chunk      string

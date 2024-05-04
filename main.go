@@ -2,6 +2,7 @@ package chunker
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 )
 
@@ -130,27 +131,48 @@ func (c *Chunker) GetChunks() []string {
 }
 
 func findFirstSeparator(chunk string, separators []string) (offset int) {
+	pos := [][]int{}
 	for _, sp := range separators {
 		if len(chunk) >= len(sp) {
 			firstPos := strings.Index(chunk, sp)
 			if firstPos != -1 {
-				return firstPos + len(sp)
+				pos = append(pos, []int{firstPos, len(sp)})
+				continue
 			}
 		}
 	}
-	return 0
+	if len(pos) == 0 {
+		return 0
+	}
+
+	sort.Slice(pos, func(i, j int) bool {
+		return pos[i][0] < pos[j][0]
+	})
+
+	return pos[0][0] + pos[0][1]
 }
 
 func findLastSeparator(chunk string, separators []string, from int) (offset, separatorSize int) {
+	pos := [][]int{}
 	for _, sp := range separators {
 		if len(chunk) >= len(sp) {
 			lastPos := strings.LastIndex(chunk, sp)
 			if lastPos != -1 && lastPos > from {
-				return lastPos, len(sp)
+				pos = append(pos, []int{lastPos, len(sp)})
+				continue
 			}
 		}
 	}
-	return 0, 0
+
+	if len(pos) == 0 {
+		return len(chunk), 0
+	}
+
+	sort.Slice(pos, func(i, j int) bool {
+		return pos[i][0] > pos[j][0]
+	})
+
+	return pos[0][0], pos[0][1]
 }
 
 func removeNewlineInChunk(chunk string) string {
