@@ -1,4 +1,4 @@
-# Chunker [WIP]
+# Chunker
 A simple chunker for text data. It is useful for chunking text data into smaller parts for processing.
 
 ## Features
