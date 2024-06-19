@@ -7,6 +7,7 @@ A simple chunker for text data. It is useful for chunking text data into smaller
 - Limit the length of each chunk, and overlap between chunks
 - Clean up the chunks by removing leading and trailing whitespaces
 - Can remove new lines from the chunks
+- It also includes a function to chunk by sentence (`ChunkSentences`)
 
 ## Installation
 ```go get github.com/jonathanhecl/chunker```

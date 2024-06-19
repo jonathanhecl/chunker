@@ -2,6 +2,7 @@ package chunker
 
 import (
 	"fmt"
+	"regexp"
 	"sort"
 	"strings"
 )
@@ -196,4 +197,26 @@ func removeNewlineInChunk(chunk string) string {
 	chunk = strings.ReplaceAll(chunk, "\n", " ")
 
 	return chunk
+}
+
+func ChunkSentences(data string) []string {
+	var sentences []string
+	re := regexp.MustCompile(`([.?!])\s+`)
+	indexes := re.FindAllStringIndex(data, -1)
+
+	start := 0
+	for _, match := range indexes {
+		text := data[start : match[1]-1]
+		text = strings.TrimSpace(text)
+		sentences = append(sentences, text)
+		start = match[1]
+	}
+
+	if start < len(data) {
+		text := data[start:]
+		text = strings.TrimSpace(text)
+		sentences = append(sentences, text)
+	}
+
+	return sentences
 }

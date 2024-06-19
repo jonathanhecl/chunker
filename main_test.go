@@ -2,6 +2,7 @@ package chunker
 
 import (
 	"fmt"
+	"reflect"
 	"testing"
 )
 
@@ -190,4 +191,39 @@ func BenchmarkChunk_Example10MB(b *testing.B) {
 			chunker.Chunk(string(content))
 		}
 	})
+}
+
+func TestChunkSentences(t *testing.T) {
+	type args struct {
+		data string
+	}
+	tests := []struct {
+		name string
+		args args
+		want []string
+	}{
+		{
+			name: "Test chunk sentences",
+			args: args{
+				data: `This is a test string. It is used to test the chunker. It is a very simple chunker.
+				
+				Rest of the text. What is this? I don't know.`,
+			},
+			want: []string{
+				"This is a test string.",
+				"It is used to test the chunker.",
+				"It is a very simple chunker.",
+				"Rest of the text.",
+				"What is this?",
+				"I don't know.",
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := ChunkSentences(tt.args.data); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("ChunkSentences() = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }
