@@ -23,11 +23,15 @@ var (
 
 // ChunkSentences splits the input text into individual sentences.
 // The sentences are delimited by periods, exclamation marks, and question marks.
+// Do not split abbreviations like Mr. and Mrs.
 //
 // The input data is the text to be split into sentences.
 // Returns a slice of strings, where each string is a sentence.
 func ChunkSentences(data string) []string {
 	var sentences []string
+	// List of common abbreviations to avoid splitting on
+	abbreviations := []string{"Mr.", "Mrs.", "Dr.", "Ms.", "Jr.", "Sr.", "Prof.", "St."}
+
 	re := regexp.MustCompile(`([.?!])\s+`)
 	indexes := re.FindAllStringIndex(data, -1)
 
@@ -35,10 +39,23 @@ func ChunkSentences(data string) []string {
 	for _, match := range indexes {
 		text := data[start : match[1]-1]
 		text = strings.TrimSpace(text)
-		sentences = append(sentences, text)
-		start = match[1]
+
+		// Check if the text ends with an abbreviation
+		split := true
+		for _, abbr := range abbreviations {
+			if strings.HasSuffix(text, abbr) {
+				split = false
+				break
+			}
+		}
+
+		if split {
+			sentences = append(sentences, text)
+			start = match[1]
+		}
 	}
 
+	// Add any remaining text as the last sentence
 	if start < len(data) {
 		text := data[start:]
 		text = strings.TrimSpace(text)
